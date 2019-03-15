@@ -1,0 +1,92 @@
+import main
+
+
+// "MyId" is a variable used to identify our node 
+
+func Synchronizer(){
+
+	var ActiveNodes := [3]int{1,1,1}
+	for{
+		select{
+
+		case NodeId <- IAmAliveCh : //If an "I am alive" is received, set the Node to alive 
+			ActiveNodes[NodeId] = 1
+			if ActiveNodes[NodeId] == 0 {
+				startTimer(NodeId) // FIX TIMER
+			}
+			else {
+				timerCh <- Number
+			}
+		case NodeId <- TimeoutCh : //If a node timeout
+			ActiveNodes[NodeId] = 0
+		case message<-OrderReceiveCh : 
+			BroadcastMessage(message, RecAckCh, OrderReceiveCh)
+		case message <- ReceiveAckCh :
+			//Receive(message)
+			
+		default
+	}
+}
+
+
+
+//This function ensures that a message sent that is to be sent through the 
+//network is actually received. If no acknowledgements are received before 
+//the timeout occurs, we assume that the node is lost and an error is reported to the order handler
+func Share(message string, RecAckCh <- chan int, OrderReceiveCh chan <- bool){
+	var Ack int
+	var CurrentReplies := [2]int{0, 0}
+	var ExpectedReplies int = 0
+	go timer(eventCh, TimeoutCh,10)
+	for{
+		select{
+		case <-TimeoutCh:
+			OrderReceiveCh <- false
+			return
+		case Ack <- RecAckCh:
+			CurrentReplies[ack] = 1
+			if sum(CurrentReplies) == ExpectedReplies { //LAG SUM FUNKSJON
+				OrderReceivedCh <- true
+				return
+			}
+		case 
+		}
+	}
+}
+
+//This function keeps track of which nodes that are alive at any moment
+func NodeStatuses() {
+	var Number int
+	var ActiveNodes := [3]int{1,1,1}
+	for{
+		select{
+		case Number <- timeoutCh: 
+			NodeDeathCh <- Number
+			ActiveNodes[Number] = 0
+		case Number <- IAACh:
+			if ActiveNodes[Number] == 0 {
+				NodeAliveCh <- Number
+			}
+			timerCh <- Number
+		}
+	}
+}
+
+
+
+
+func SendAck(AckMessage)
+	broadcast(Transmitter)
+//This functions simply sends an acknowledgement through the network with a syntax so that we know
+//What the message acknowledgements
+
+func Receive(message) {
+	SendAck(message)
+	NewOrderInCh <- message
+}
+
+//When a message is received here, the message will be forwarded to the OrderHandler and an
+//acknowledgement will be sent through sendack
+
+func ReceiveAck(AckMessage)
+//
